@@ -1,0 +1,25 @@
+{
+  "name": "telegraf-tools",
+  "version": "1.0.6",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon test",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "murphyy",
+  "license": "ISC",
+  "keywords": [
+    "npm",
+    "package",
+    "telegraf",
+    "telegram",
+    "tools",
+    "jsonbase"
+  ],
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "nodemon": "^2.0.21",
+    "telegraf": "^4.12.0"
+  }
+}
