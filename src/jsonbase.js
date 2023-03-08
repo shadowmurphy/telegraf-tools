@@ -1,8 +1,8 @@
 const fs = require('fs');
 
 class JsonBase {
-  constructor(filename, defaultValue, dirpath = "database") {
-    this.dirpath = dirpath;
+  constructor(filename, defaultValue, dirpath = `database`) {
+    this.dirpath = `${process.mainModule.path}/${dirpath}`;
     defaultValue = JSON.parse(JSON.stringify(defaultValue));
     this.pathfile = `${this.dirpath}/${filename}.json`;
 
@@ -54,62 +54,73 @@ class JsonBase {
 
 
 class User {
-    constructor(from, database, dop_data) {
-      this.user = from;
-      const additionalData = dop_data();
-      for (const key in additionalData) {
-        if (!this.user[key]) this.user[key] = additionalData[key];
-      }
-      this.database = database;
-      this.unpack();
+  constructor(from, database, dop_data) {
+    this.user = from;
+    const additionalData = dop_data();
+    for (const key in additionalData) {
+      if (!this.user[key]) this.user[key] = additionalData[key];
     }
-  
-    edit(key, value) {
-      this.user[key] = value;
-      this.unpack();
+    this.database = database;
+    this.unpack();
+  }
+
+  edit(key, value) {
+    this.user[key] = value;
+    this.unpack();
+    this.save();
+  }
+
+  unpack() {
+    for (const key in this.user) {
+      this[key] = this.user[key];
+    }
+  }
+
+  save() {
+    this.database.save();
+  }
+}
+
+class Users {
+  constructor(dop_data) {
+    this.users = new JsonBase("users", {}, './database');
+    this.dop_data = dop_data;
+  }
+
+  get(from, needCreate) {
+    let user = this.users.body[from.id];
+    if (!user && needCreate) {
+      user = new User(from, this.users, this.dop_data);
+      this.users.body[user.id] = user.user;
       this.save();
     }
-  
-    unpack() {
-      for (const key in this.user) {
-        this[key] = this.user[key];
-      }
-    }
-  
-    save() {
-      this.database.save();
-    }
+    return this.users.body[from.id]
+      ? new User(this.users.body[from.id], this.users, this.dop_data)
+      : false;
   }
-  
-  class Users {
-    constructor(dop_data) {
-      this.users = new JsonBase("users", {}, './database');
-      this.dop_data = dop_data;
-    }
-  
-    get(from, needCreate) {
-      let user = this.users.body[from.id];
-      if (!user && needCreate) {
-        user = new User(from, this.users, this.dop_data);
-        this.users.body[user.id] = user.user;
-        this.save();
-      }
-      return this.users.body[from.id]
-        ? new User(this.users.body[from.id], this.users, this.dop_data)
-        : false;
-    }
-  
-    save() {
-      this.users.save();
-    }
-  
-    getArray() {
-      let array = [];
-      for (const id in this.users.body) {
-        array.push(this.users.body[id]);
-      }
-      return array;
-    }
+
+  save() {
+    this.users.save();
   }
-  
-  module.exports = () => ({ JsonBase, User, Users });
+
+  getArray() {
+    let array = [];
+    for (const id in this.users.body) {
+      array.push(this.users.body[id]);
+    }
+    return array;
+  }
+
+  filter(param, value) {
+    return Object.values(this.users.body).filter(user => user[param] === value);
+  }
+
+  sort(param) {
+    const entries = Object.entries(this.users.body);
+    entries.sort((a, b) => a[1][param] > b[1][param] ? 1 : -1);
+    return Object.fromEntries(entries);
+  }
+
+}
+
+module.exports = () => ({ JsonBase, User, Users });

@@ -1,6 +1,6 @@
 {
   "name": "telegraf-tools",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -9,6 +9,10 @@
   },
   "author": "murphyy",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shadowmurphy/telegraf-tools/tree/master"
+  },
   "keywords": [
     "npm",
     "package",

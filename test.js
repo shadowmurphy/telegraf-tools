@@ -4,13 +4,26 @@ require('dotenv').config();
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
-const { loadlib, createJsonBase } = require('./index')(bot);
+const { loadlib, createJsonBase, logger } = require('./index')(bot);
 
-loadlib('profile', "/test");
+loadlib('test', "/test");
 
-createJsonBase()
+loadlib('jsonbase', "/src");
+
+bot.context.users = new bot.context.jsonbase.Users(() => ({
+    is_admin: false
+}))
+
+bot
+.use(async (ctx, next) => {
+    if (!ctx.from) return;
+    ctx.user = ctx.users.get(ctx.from, true)
+    return next()
+})
 
 bot
 .launch({dropPendingUpdates: true})
-.then(() => console.log('Бот запущен!!'))
+.then(logger.log('Бот запущен!', {
+    red: "Бот запущен!"
+}))
 .catch((err) => console.error(err));
